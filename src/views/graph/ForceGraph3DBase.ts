@@ -33,24 +33,28 @@ export class ForceGraph3DBase extends ForceGraphBase<ForceGraph3DInstance> {
 			.width(width)
 			.height(height)
 			.numDimensions(3)
-			.d3Force("center", (alpha) => {
-				const nodes = this.instance.graphData().nodes;
-				for (var i = 0, n = nodes.length; i < n; ++i) {
-					var node = nodes[i]
-					var dx = (node.x as number) - 0 || 1e-6 
-					var dy = (node.y as number) - 0 || 1e-6 
-					var dz = (node.z as number) - 0 || 1e-6
-					var r = Math.sqrt(dx * dx + dy * dy + dz * dz)
-					var k = -0.0001 * 1.0 * alpha * r;
-					if (node.vx && node.vy && node.vz) {
-						node.vx += dx * k;
-						node.vy += dy * k;
-						node.vz += dz * k;
-					}
-				}
-			});
-			console.log(this.instance.d3Force("center"));
+			.d3Force("center", this.centerForce(0.0001));
+		console.log(this.plugin.getSettings().force.centerStrength)
 		
+	}
+
+	protected override centerForce(strength: number): (alpha: number) => void {
+		return (alpha) => {
+			const nodes = this.instance.graphData().nodes;
+			for (var i = 0, n = nodes.length; i < n; ++i) {
+				var node = nodes[i]
+				var dx = (node.x as number) - 0 || 1e-6 
+				var dy = (node.y as number) - 0 || 1e-6 
+				var dz = (node.z as number) - 0 || 1e-6
+				var r = Math.sqrt(dx * dx + dy * dy + dz * dz)
+				var k = -strength * alpha * r;
+				if (node.vx && node.vy && node.vz) {
+					node.vx += dx * k;
+					node.vy += dy * k;
+					node.vz += dz * k;
+				}
+			}
+		}
 	}
 
 

@@ -8,8 +8,10 @@ import State, { StateChange } from "../../util/State";
 import EventBus from "../../util/EventBus";
 import GroupSettingsView from "./categories/GroupSettingsView";
 import FilterSettingsView from "./categories/FilterSettingsView";
+import ForceSettingsView from "./categories/ForceSettingsView";
 import GraphSettings from "src/settings/GraphSettings";
 import ObsidianTheme from "src/util/ObsidianTheme";
+import { ForceSettings } from "src/settings/categories/ForceSettings";
 
 export class GraphSettingsView extends HTMLDivElement {
 	private settingsButton: ExtraButtonComponent;
@@ -69,6 +71,11 @@ export class GraphSettingsView extends HTMLDivElement {
 			this.settingsState.createSubState("value.display", DisplaySettings),
 			"Display",
 			DisplaySettingsView
+		);
+		this.appendSetting(
+			this.settingsState.createSubState("value.force", ForceSettings),
+			"Force",
+			ForceSettingsView
 		);
 		this.initListeners();
 		this.toggleCollapsed(this.isCollapsedState.value);

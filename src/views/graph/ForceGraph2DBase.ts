@@ -50,6 +50,23 @@ export class ForceGraph2DBase extends ForceGraphBase<ForceGraphInstance> {
 		}
 	};
 
+	protected override centerForce(strength: number): (alpha: number) => void {
+		return (alpha) => {
+			const nodes = this.instance.graphData().nodes;
+			for (var i = 0, n = nodes.length; i < n; ++i) {
+				var node = nodes[i]
+				var dx = (node.x as number) - 0 || 1e-6
+				var dy = (node.y as number) - 0 || 1e-6
+				var r = Math.sqrt(dx * dx + dy * dy)
+				var k = -strength * alpha * r;
+				if (node.vx && node.vy) {
+					node.vx += dx * k;
+					node.vy += dy * k;
+				}
+			}
+		}
+	}
+
     protected createNodes = () => {
 		this.instance
 			.nodeColor((node: Node) => this.getNodeColor(node))

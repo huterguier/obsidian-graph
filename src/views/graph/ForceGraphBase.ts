@@ -67,7 +67,10 @@ export abstract class ForceGraphBase<T extends ForceGraph3DInstance | ForceGraph
 		this.instance.graphData(this.getGraphData());
 	};
 
+	protected abstract centerForce(strength : number): (alpha: number) => void;
+
 	protected onSettingsStateChanged = (data: StateChange) => {
+		console.log("onSettingsStateChanged", data)
 		if (data.currentPath === "display.nodeSize") {
 			this.instance.nodeRelSize(data.newValue);
 		} else if (data.currentPath === "display.linkThickness") {
@@ -77,6 +80,10 @@ export abstract class ForceGraphBase<T extends ForceGraph3DInstance | ForceGraph
 			this.instance.linkDirectionalParticleWidth(
 				this.plugin.getSettings().display.particleSize
 			);
+		} else if (data.currentPath === "force.centerStrength") {
+			console.log("backgroundColor", data.newValue);
+			this.instance.d3Force("center", this.centerForce(data.newValue));
+			this.instance.d3ReheatSimulation();
 		}
 		// only refresh if 3d graph
 		if (this.instance instanceof ForceGraph3D){
@@ -98,10 +105,7 @@ export abstract class ForceGraphBase<T extends ForceGraph3DInstance | ForceGraph
 		this.instance.height(height);
 	}
 
-    protected createNodes = () => {
-		this.instance
-			.nodeColor((node: Node) => this.getNodeColor(node))
-	};
+    protected abstract createNodes(): void;
 
 	protected getNodeColor = (node: Node): string => {
 		if (this.isHighlightedNode(node)) {
