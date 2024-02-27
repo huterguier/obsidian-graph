@@ -1,5 +1,5 @@
 import { Notice, Plugin } from "obsidian";
-import { Graph3dView } from "./views/graph/Graph3dView";
+import { GraphView } from "./views/graph/GraphView";
 import GraphSettings from "./settings/GraphSettings";
 import State from "./util/State";
 import Graph from "./graph/Graph";
@@ -22,7 +22,7 @@ export default class Graph3dPlugin extends Plugin {
 	public globalGraph: Graph;
 	public theme: ObsidianTheme;
 	// Graphs that are waiting for cache to be ready
-	private queuedGraphs: Graph3dView[] = [];
+	private queuedGraphs: GraphView[] = [];
 	private callbackUnregisterHandles: (() => void)[] = [];
 
 	async onload() {
@@ -169,7 +169,7 @@ export default class Graph3dPlugin extends Plugin {
 	// Open a global or local graph
 	private openGraph = (isLocalGraph: boolean) => {
 		const leaf = this.app.workspace.getLeaf(isLocalGraph ? "split" : false);
-		const graphView = new Graph3dView(this, leaf, isLocalGraph);
+		const graphView = new GraphView(this, leaf, isLocalGraph);
 		leaf.open(graphView);
 		if (this.cacheIsReady.value) {
 			graphView.showGraph();

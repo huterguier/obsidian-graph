@@ -1,4 +1,5 @@
 import ForceGraph3D, { ForceGraph3DInstance } from "3d-force-graph";
+import ForceGraph, { ForceGraphInstance } from "force-graph";
 import Node from "../../graph/Node";
 import Link from "../../graph/Link";
 import { StateChange } from "../../util/State";
@@ -11,17 +12,17 @@ import EventBus from "../../util/EventBus";
 // Adapted from https://github.com/vasturiano/3d-force-graph/blob/master/example/highlight/index.html
 // D3.js 3D Force Graph
 
-export class ForceGraph {
-	private instance: ForceGraph3DInstance;
-	private readonly rootHtmlElement: HTMLElement;
+export abstract class ForceGraphBase<T extends ForceGraph3DInstance | ForceGraphInstance>{
+	protected instance: T;
+	protected readonly rootHtmlElement: HTMLElement;
 
-	private readonly highlightedNodes: Set<string> = new Set();
-	private readonly highlightedLinks: Set<Link> = new Set();
+	protected readonly highlightedNodes: Set<string> = new Set();
+	protected readonly highlightedLinks: Set<Link> = new Set();
 	hoveredNode: Node | null;
 
-	private readonly isLocalGraph: boolean;
-	private graph: Graph;
-	private readonly plugin: Graph3dPlugin;
+	protected readonly isLocalGraph: boolean;
+	protected graph: Graph;
+	protected readonly plugin: Graph3dPlugin;
 
 	constructor(
 		plugin: Graph3dPlugin,
@@ -38,36 +39,22 @@ export class ForceGraph {
 		this.initListeners();
 	}
 
-	private initListeners() {
+	protected initListeners() {
 		this.plugin.settingsState.onChange(this.onSettingsStateChanged);
 		if (this.isLocalGraph)
 			this.plugin.openFileState.onChange(this.refreshGraphData);
 		EventBus.on("graph-changed", this.refreshGraphData);
 	}
 
-	private createGraph() {
+	protected createGraph() {
 		this.createInstance();
 		this.createNodes();
 		this.createLinks();
 	}
 
-	private createInstance() {
-		const [width, height] = [
-			this.rootHtmlElement.innerWidth,
-			this.rootHtmlElement.innerHeight,
-		];
-		this.instance = ForceGraph3D()(this.rootHtmlElement)
-			.graphData(this.getGraphData())
-			.nodeLabel(
-				(node: Node) => `<div class="node-label">${node.name}</div>`
-			)
-			.nodeRelSize(this.plugin.getSettings().display.nodeSize)
-			.backgroundColor(rgba(0, 0, 0, 0.0))
-			.width(width)
-			.height(height);
-	}
+	protected abstract createInstance(): void;
 
-	private getGraphData = (): Graph => {
+	protected getGraphData = (): Graph => {
 		if (this.isLocalGraph && this.plugin.openFileState.value) {
 			this.graph = this.plugin.globalGraph
 				.clone()
@@ -80,23 +67,11 @@ export class ForceGraph {
 		return this.graph;
 	};
 
-	private refreshGraphData = () => {
+	protected refreshGraphData = () => {
 		this.instance.graphData(this.getGraphData());
 	};
 
-	private onSettingsStateChanged = (data: StateChange) => {
-		if (data.currentPath === "display.nodeSize") {
-			this.instance.nodeRelSize(data.newValue);
-		} else if (data.currentPath === "display.linkWidth") {
-			this.instance.linkWidth(data.newValue);
-		} else if (data.currentPath === "display.particleSize") {
-			this.instance.linkDirectionalParticleWidth(
-				this.plugin.getSettings().display.particleSize
-			);
-		}
-
-		this.instance.refresh(); // other settings only need a refresh
-	};
+	protected abstract onSettingsStateChanged : (data: StateChange) => void;
 
 	public updateDimensions() {
 		const [width, height] = [
@@ -111,14 +86,9 @@ export class ForceGraph {
 		this.instance.height(height);
 	}
 
-	private createNodes = () => {
-		this.instance
-			.nodeColor((node: Node) => this.getNodeColor(node))
-			.nodeVisibility(this.doShowNode)
-			.onNodeHover(this.onNodeHover);
-	};
+	protected abstract createNodes(): void;
 
-	private getNodeColor = (node: Node): string => {
+	protected getNodeColor = (node: Node): string => {
 		if (this.isHighlightedNode(node)) {
 			// Node is highlighted
 			return node === this.hoveredNode
@@ -134,7 +104,7 @@ export class ForceGraph {
 		}
 	};
 
-	private doShowNode = (node: Node) => {
+	protected doShowNode = (node: Node) => {
 		return (
 			(this.plugin.getSettings().filters.doShowOrphans ||
 			node.links.length > 0) &&
@@ -143,11 +113,11 @@ export class ForceGraph {
 		);
 	};
 
-	private doShowLink = (link: Link) => {
+	protected doShowLink = (link: Link) => {
 		return this.plugin.getSettings().filters.doShowAttachments || !link.linksAnAttachment
 	}
 
-	private onNodeHover = (node: Node | null) => {
+	protected onNodeHover = (node: Node | null) => {
 		if (
 			(!node && !this.highlightedNodes.size) ||
 			(node && this.hoveredNode === node)
@@ -170,39 +140,17 @@ export class ForceGraph {
 		this.updateHighlight();
 	};
 
-	private isHighlightedLink = (link: Link): boolean => {
+	protected isHighlightedLink = (link: Link): boolean => {
 		return this.highlightedLinks.has(link);
 	};
 
-	private isHighlightedNode = (node: Node): boolean => {
+	protected isHighlightedNode = (node: Node): boolean => {
 		return this.highlightedNodes.has(node.id);
 	};
 
-	private createLinks = () => {
-		this.instance
-			.linkWidth((link: Link) =>
-				this.isHighlightedLink(link)
-					? this.plugin.getSettings().display.linkThickness * 1.5
-					: this.plugin.getSettings().display.linkThickness
-			)
-			.linkDirectionalParticles((link: Link) =>
-				this.isHighlightedLink(link)
-					? this.plugin.getSettings().display.particleCount
-					: 0
-			)
-			.linkDirectionalParticleWidth(
-				this.plugin.getSettings().display.particleSize
-			)
-			.linkVisibility(this.doShowLink)
-			.onLinkHover(this.onLinkHover)
-			.linkColor((link: Link) =>
-				this.isHighlightedLink(link)
-					? this.plugin.theme.textAccent
-					: this.plugin.theme.textMuted
-			);
-	};
+	protected abstract createLinks(): void;
 
-	private onLinkHover = (link: Link | null) => {
+	protected onLinkHover = (link: Link | null) => {
 		this.clearHighlights();
 
 		if (link) {
@@ -213,20 +161,14 @@ export class ForceGraph {
 		this.updateHighlight();
 	};
 
-	private clearHighlights = () => {
+	protected clearHighlights = () => {
 		this.highlightedNodes.clear();
 		this.highlightedLinks.clear();
 	};
 
-	private updateHighlight() {
-		// trigger update of highlighted objects in scene
-		this.instance
-			.nodeColor(this.instance.nodeColor())
-			.linkColor(this.instance.linkColor())
-			.linkDirectionalParticles(this.instance.linkDirectionalParticles());
-	}
+	protected abstract updateHighlight(): void;
 
-	getInstance(): ForceGraph3DInstance {
+	getInstance(): T {
 		return this.instance;
 	}
 }

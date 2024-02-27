@@ -1,11 +1,14 @@
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import Node from "../../graph/Node";
-import { ForceGraph } from "./ForceGraph";
+import { ForceGraph3DBase } from "./ForceGraph3DBase";
+import { ForceGraph2DBase } from "./ForceGraph2DBase";
+import { ForceGraphBase } from "./ForceGraphBase";
 import { GraphSettingsView } from "../settings/GraphSettingsView";
 import Graph3dPlugin from "src/main";
+import { ForceGraph3DInstance } from "3d-force-graph";
 
-export class Graph3dView extends ItemView {
-	private forceGraph: ForceGraph;
+export class GraphView extends ItemView {
+	private forceGraph: ForceGraphBase<any>;
 	private readonly isLocalGraph: boolean;
 	private readonly plugin: Graph3dPlugin;
 
@@ -56,7 +59,7 @@ export class Graph3dView extends ItemView {
 	}
 
 	private appendGraph(viewContent: HTMLElement) {
-		this.forceGraph = new ForceGraph(
+		this.forceGraph = new ForceGraph3DBase(
 			this.plugin,
 			viewContent,
 			this.isLocalGraph
