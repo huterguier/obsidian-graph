@@ -107,7 +107,10 @@ export default class State<T> {
 	};
 
 	private notifyAll = (changeData: StateChange) => {
-		this.listeners.forEach((listener) => listener(changeData));
+		this.listeners.forEach((listener) => {
+			console.log("notifying listener", listener, changeData);
+			listener(changeData)
+		});
 	};
 
 	private onValueChange = (changes: StateChange[]) => {

@@ -12,6 +12,12 @@ export class ForceGraph2DBase extends ForceGraphBase<ForceGraphInstance> {
         super(plugin, rootHtmlElement, isLocalGraph);
     }
 
+	protected createGraph() {
+		this.createInstance();
+		this.createNodes();
+		this.createLinks();
+	}
+
     protected createInstance() {
 		const [width, height] = [
 			this.rootHtmlElement.innerWidth,

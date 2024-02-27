@@ -3,7 +3,7 @@ import DisplaySettingsView from "./categories/DisplaySettingsView";
 import { FilterSettings } from "../../settings/categories/FilterSettings";
 import { GroupSettings } from "../../settings/categories/GroupSettings";
 import { DisplaySettings } from "../../settings/categories/DisplaySettings";
-import { ExtraButtonComponent } from "obsidian";
+import { ButtonComponent, ExtraButtonComponent } from "obsidian";
 import State, { StateChange } from "../../util/State";
 import EventBus from "../../util/EventBus";
 import GroupSettingsView from "./categories/GroupSettingsView";
@@ -30,10 +30,24 @@ export class GraphSettingsView extends HTMLDivElement {
 	async connectedCallback() {
 		this.classList.add("graph-settings-view");
 
+
 		this.settingsButton = new ExtraButtonComponent(this)
 			.setIcon("settings")
-			.setTooltip("Open graph settings")
+			.setTooltip("Graph settings")
 			.onClick(this.onSettingsButtonClicked);
+		
+		const otherSettings = new ButtonComponent(this)
+			.setIcon("rotate-3d")
+			.setTooltip("Switch to 3d")
+			.onClick(this.onSettingsButtonClicked)
+			.setClass("left")
+		// place at bottom left corner
+		otherSettings.buttonEl.style.position = "absolute";
+		otherSettings.buttonEl.style.bottom = "0";
+		otherSettings.buttonEl.style.left = "0";
+		otherSettings.buttonEl.style.marginLeft = "10px";
+		otherSettings.buttonEl.style.marginBottom = "10px";
+
 
 		this.graphControls = this.createDiv({ cls: "graph-controls" });
 

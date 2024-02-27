@@ -12,15 +12,21 @@ export class ForceGraph3DBase extends ForceGraphBase<ForceGraph3DInstance> {
         super(plugin, rootHtmlElement, isLocalGraph);
     }
 
-    protected createInstance() {
+	protected createGraph() {
+		this.createInstance();
+		this.createNodes();
+		this.createLinks();
+	}
+
+    protected override createInstance() {
 		const [width, height] = [
 			this.rootHtmlElement.innerWidth,
 			this.rootHtmlElement.innerHeight,
 		];
 		this.instance = ForceGraph3D()(this.rootHtmlElement)
-			.graphData(this.getGraphData())
-			.nodeLabel(
-				(node: Node) => `<div class="node-label">${node.name}</div>`
+		.graphData(this.getGraphData())
+		.nodeLabel(
+			(node: Node) => `<div class="node-label">${node.name}</div>`
 			)
 			.nodeRelSize(this.plugin.getSettings().display.nodeSize)
 			.backgroundColor(rgba(0, 0, 0, 0.0))
@@ -35,21 +41,20 @@ export class ForceGraph3DBase extends ForceGraphBase<ForceGraph3DInstance> {
 					var dy = (node.y as number) - 0 || 1e-6 
 					var dz = (node.z as number) - 0 || 1e-6
 					var r = Math.sqrt(dx * dx + dy * dy + dz * dz)
-					var k = (200.0 - r) * 1.0 * alpha / r;
+					var k = -0.0001 * 1.0 * alpha * r;
 					if (node.vx && node.vy && node.vz) {
 						node.vx += dx * k;
 						node.vy += dy * k;
 						node.vz += dz * k;
 					}
-			  	}
+				}
 			});
-		console.log(this.instance.d3Force("center"));
+			console.log(this.instance.d3Force("center"));
 		
 	}
 
 
-
-    protected onSettingsStateChanged = (data: StateChange) => {
+    protected override onSettingsStateChanged = (data: StateChange) => {
 		if (data.currentPath === "display.nodeSize") {
 			this.instance.nodeRelSize(data.newValue);
 		} else if (data.currentPath === "display.linkWidth") {
@@ -63,14 +68,15 @@ export class ForceGraph3DBase extends ForceGraphBase<ForceGraph3DInstance> {
 		this.instance.refresh(); // other settings only need a refresh
 	};
 
-    protected createNodes = () => {
+    protected override createNodes() {
 		this.instance
 			.nodeColor((node: Node) => this.getNodeColor(node))
 			.nodeVisibility(this.doShowNode)
 			.onNodeHover(this.onNodeHover);
 	};
 
-    protected createLinks = () => {
+    protected override createLinks() {
+		console.log("ForceGraph3DBase createLinks");
 		this.instance
 			.linkWidth((link: Link) =>
 				this.isHighlightedLink(link)
