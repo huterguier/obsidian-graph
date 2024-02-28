@@ -8,17 +8,18 @@ import { rgba } from "polished";
 import * as d3 from "d3";
 
 export class ForceGraph2DBase extends ForceGraphBase<ForceGraphInstance> {
-    constructor(plugin: Graph3dPlugin, rootHtmlElement: HTMLElement, isLocalGraph: boolean) {
-        super(plugin, rootHtmlElement, isLocalGraph);
-    }
+	constructor(plugin: Graph3dPlugin, rootHtmlElement: HTMLElement, isLocalGraph: boolean) {
+		super(plugin, rootHtmlElement, isLocalGraph);
+	}
 
 	protected createGraph() {
+		console.log("ForceGraph2DBase createGraph");
 		this.createInstance();
 		this.createNodes();
 		this.createLinks();
 	}
 
-    protected createInstance() {
+	protected createInstance() {
 		const [width, height] = [
 			this.rootHtmlElement.innerWidth,
 			this.rootHtmlElement.innerHeight,
@@ -28,9 +29,9 @@ export class ForceGraph2DBase extends ForceGraphBase<ForceGraphInstance> {
 			.graphData(this.getGraphData())
 			.nodeLabel(
 				(node: Node) => `<div class="node-label">${node.name}</div>`
-				)
-				.nodeRelSize(this.plugin.getSettings().display.nodeSize)
-				.backgroundColor(rgba(0, 0, 0, 0.0))
+			)
+			.nodeRelSize(this.plugin.getSettings().display.nodeSize)
+			.backgroundColor(rgba(0, 0, 0, 0.0))
 			.width(width)
 			.height(height)
 			.d3Force("center", d3.forceRadial(-1))
@@ -38,7 +39,7 @@ export class ForceGraph2DBase extends ForceGraphBase<ForceGraphInstance> {
 		console.log(this.instance.graphData().nodes);
 	}
 
-    protected onSettingsStateChanged = (data: StateChange) => {
+	protected onSettingsStateChanged = (data: StateChange) => {
 		if (data.currentPath === "display.nodeSize") {
 			this.instance.nodeRelSize(data.newValue);
 		} else if (data.currentPath === "display.linkWidth") {
@@ -67,14 +68,15 @@ export class ForceGraph2DBase extends ForceGraphBase<ForceGraphInstance> {
 		}
 	}
 
-    protected createNodes = () => {
+	protected createNodes() {
 		this.instance
 			.nodeColor((node: Node) => this.getNodeColor(node))
 			.nodeVisibility(this.doShowNode)
 			.onNodeHover(this.onNodeHover);
 	};
 
-	protected createLinks = () => {
+	protected override createLinks() {
+		console.log("gdkljhgklödsjgs")
 		this.instance
 			.linkWidth((link: Link) =>
 				this.isHighlightedLink(link)
@@ -94,11 +96,11 @@ export class ForceGraph2DBase extends ForceGraphBase<ForceGraphInstance> {
 			.linkColor((link: Link) =>
 				this.isHighlightedLink(link)
 					? this.plugin.theme.textAccent
-					: this.plugin.theme.textMuted
+					: this.plugin.theme.textFaint
 			);
 	};
 
-    protected override updateHighlight() {
+	protected override updateHighlight() {
 		// trigger update of highlighted objects in scene
 		this.instance
 			.nodeColor(this.instance.nodeColor())

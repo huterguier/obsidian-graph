@@ -1,6 +1,6 @@
 export class DisplaySettings {
 	nodeSize = 4;
-	linkThickness = 5;
+	linkThickness = 2;
 	particleSize = 6;
 	particleCount = 4;
 

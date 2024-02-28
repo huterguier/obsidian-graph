@@ -6,11 +6,13 @@ import { ForceGraphBase } from "./ForceGraphBase";
 import { GraphSettingsView } from "../settings/GraphSettingsView";
 import Graph3dPlugin from "src/main";
 import { ForceGraph3DInstance } from "3d-force-graph";
+import { ButtonComponent } from "obsidian";
 
 export class GraphView extends ItemView {
 	private forceGraph: ForceGraphBase<any>;
 	private readonly isLocalGraph: boolean;
 	private readonly plugin: Graph3dPlugin;
+	private is3dGraph: boolean;
 
 	constructor(
 		plugin: Graph3dPlugin,
@@ -20,6 +22,22 @@ export class GraphView extends ItemView {
 		super(leaf);
 		this.isLocalGraph = isLocalGraph;
 		this.plugin = plugin;
+		this.is3dGraph = false;
+
+		const viewContent = this.containerEl.querySelector(
+			".view-content"
+		) as HTMLElement;
+		const otherSettings = new ButtonComponent(viewContent)
+			.setIcon("rotate-3d")
+			.setTooltip("Switch to 3d")
+			.onClick(this.switchGraph);
+		// place at bottom left corner
+		otherSettings.buttonEl.style.position = "absolute";
+		otherSettings.buttonEl.style.bottom = "0";
+		otherSettings.buttonEl.style.left = "0";
+		otherSettings.buttonEl.style.marginLeft = "10px";
+		otherSettings.buttonEl.style.marginBottom = "10px";
+		console.log("added button")
 	}
 
 	onunload() {
@@ -37,7 +55,8 @@ export class GraphView extends ItemView {
 			this.appendGraph(viewContent);
 			const settings = new GraphSettingsView(
 				this.plugin.settingsState,
-				this.plugin.theme
+				this.plugin.theme,
+				this.switchGraph.bind(this)
 			);
 			viewContent.appendChild(settings);
 		} else {
@@ -58,12 +77,32 @@ export class GraphView extends ItemView {
 		this.forceGraph.updateDimensions();
 	}
 
+	switchGraph(mouseEvent: MouseEvent) {
+		console.log("switching graph");
+		this.forceGraph.getInstance()._destructor();
+		const viewContent = this.containerEl.querySelector(
+			".view-content"
+		) as HTMLElement;
+		this.is3dGraph = !this.is3dGraph;
+		viewContent.innerHTML = "";
+		this.showGraph();
+	}
+
 	private appendGraph(viewContent: HTMLElement) {
-		this.forceGraph = new ForceGraph3DBase(
-			this.plugin,
-			viewContent,
-			this.isLocalGraph
-		);
+		if (this.is3dGraph) {
+			this.forceGraph = new ForceGraph3DBase(
+				this.plugin,
+				viewContent,
+				this.isLocalGraph
+			);
+		}
+		else {
+			this.forceGraph = new ForceGraph2DBase(
+				this.plugin,
+				viewContent,
+				this.isLocalGraph
+				);
+		}
 
 		this.forceGraph
 			.getInstance()

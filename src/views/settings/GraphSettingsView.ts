@@ -18,11 +18,13 @@ export class GraphSettingsView extends HTMLDivElement {
 	private graphControls: HTMLDivElement;
 	private readonly settingsState: State<GraphSettings>;
 	private readonly theme: ObsidianTheme;
+	private readonly switchCallback: (mouseEvent: MouseEvent) => void;
 
-	constructor(settingsState: State<GraphSettings>, theme: ObsidianTheme) {
+	constructor(settingsState: State<GraphSettings>, theme: ObsidianTheme, switchCallback: (mouseEvent: MouseEvent) => void) { 
 		super();
 		this.settingsState = settingsState;
 		this.theme = theme;
+		this.switchCallback = switchCallback;
 	}
 
 	private isCollapsedState = new State(true);
@@ -37,19 +39,18 @@ export class GraphSettingsView extends HTMLDivElement {
 			.setIcon("settings")
 			.setTooltip("Graph settings")
 			.onClick(this.onSettingsButtonClicked);
-		
-		const otherSettings = new ButtonComponent(this)
-			.setIcon("rotate-3d")
-			.setTooltip("Switch to 3d")
-			.onClick(this.onSettingsButtonClicked)
-			.setClass("left")
-		// place at bottom left corner
-		otherSettings.buttonEl.style.position = "absolute";
-		otherSettings.buttonEl.style.bottom = "0";
-		otherSettings.buttonEl.style.left = "0";
-		otherSettings.buttonEl.style.marginLeft = "10px";
-		otherSettings.buttonEl.style.marginBottom = "10px";
 
+			const otherSettings = new ButtonComponent(this)
+				.setIcon("rotate-3d")
+				.setTooltip("Switch to 3d")
+				.onClick(this.switchCallback);
+			// place at bottom left corner
+			otherSettings.buttonEl.style.position = "absolute";
+			otherSettings.buttonEl.style.bottom = "0";
+			otherSettings.buttonEl.style.left = "0";
+			otherSettings.buttonEl.style.marginLeft = "10px";
+			otherSettings.buttonEl.style.marginBottom = "10px";
+			console.log("added button")
 
 		this.graphControls = this.createDiv({ cls: "graph-controls" });
 
