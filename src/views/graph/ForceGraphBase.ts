@@ -70,7 +70,11 @@ export abstract class ForceGraphBase<T extends ForceGraph3DInstance | ForceGraph
 	protected abstract centerForce(strength : number): (alpha: number) => void;
 
 	protected onSettingsStateChanged = (data: StateChange) => {
-		console.log("onSettingsStateChanged", data)
+		this.refreshNodes();
+	
+		if (data.currentPath === "filter.doShowAttachments") {
+			console.log("onSettingsStateChanged", data)
+		}
 		if (data.currentPath === "display.nodeSize") {
 			this.instance.nodeRelSize(data.newValue);
 		} else if (data.currentPath === "display.linkThickness") {
@@ -131,6 +135,18 @@ export abstract class ForceGraphBase<T extends ForceGraph3DInstance | ForceGraph
 			!node.isAttachment)
 		);
 	};
+
+	protected refreshNodes = () => 
+	{
+		var graph = this.getGraphData();
+		var nodes = graph.nodes;
+		var links = graph.links;
+
+		nodes = nodes.filter(this.doShowNode);
+		links = links.filter(this.doShowLink);
+
+		this.instance.graphData({ nodes, links });
+	}
 
 	protected doShowLink = (link: Link) => {
 		return this.plugin.getSettings().filters.doShowAttachments || !link.linksAnAttachment

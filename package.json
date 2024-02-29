@@ -15,6 +15,7 @@
 	"devDependencies": {
 		"@types/d3": "^7.4.0",
 		"@types/node": "^16.11.6",
+		"@types/three": "^0.161.2",
 		"@typescript-eslint/eslint-plugin": "5.29.0",
 		"@typescript-eslint/parser": "5.29.0",
 		"builtin-modules": "3.3.0",
@@ -28,6 +29,8 @@
 		"d3": "^7.6.1",
 		"d3-force-3d": "^3.0.5",
 		"force-graph": "^1.43.5",
-		"observable-slim": "^0.1.6"
+		"observable-slim": "^0.1.6",
+		"three": "^0.161.0",
+		"three-spritetext": "^1.8.2"
 	}
 }

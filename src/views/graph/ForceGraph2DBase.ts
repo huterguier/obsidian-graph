@@ -72,7 +72,21 @@ export class ForceGraph2DBase extends ForceGraphBase<ForceGraphInstance> {
 		this.instance
 			.nodeColor((node: Node) => this.getNodeColor(node))
 			.nodeVisibility(this.doShowNode)
-			.onNodeHover(this.onNodeHover);
+			.onNodeHover(this.onNodeHover)
+			.nodeCanvasObjectMode(() => "before")
+			.nodeCanvasObject((node, ctx: CanvasRenderingContext2D, globalScale: number) => {
+				const label = (node as Node).name;
+				const fontSize = 12 / globalScale;
+				ctx.font = `${fontSize}px Sans-Serif`;
+				const textWidth = ctx.measureText(label).width;
+				const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
+				const alpha = 1 / globalScale;
+				ctx.fillStyle = "rgba(255, 255, 255, " + alpha + ")";
+				ctx.fillText(label, (node as any).x - textWidth / 2, (node as any).y + fontSize / 2);
+				// hide text according to zoom level
+				
+
+			});
 	};
 
 	protected override createLinks() {

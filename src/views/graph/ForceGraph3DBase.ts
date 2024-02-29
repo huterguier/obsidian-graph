@@ -6,6 +6,7 @@ import Link from "src/graph/Link";
 import Node from "src/graph/Node";
 import { rgba } from "polished";
 import * as d3 from "d3";
+import SpriteText from "three-spritetext";
 
 export class ForceGraph3DBase extends ForceGraphBase<ForceGraph3DInstance> {
     constructor(plugin: Graph3dPlugin, rootHtmlElement: HTMLElement, isLocalGraph: boolean) {
@@ -72,12 +73,39 @@ export class ForceGraph3DBase extends ForceGraphBase<ForceGraph3DInstance> {
 		this.instance.refresh(); // other settings only need a refresh
 	};
 
-    protected override createNodes() {
-		this.instance
-			.nodeColor((node: Node) => this.getNodeColor(node))
-			.nodeVisibility(this.doShowNode)
-			.onNodeHover(this.onNodeHover);
-	};
+protected override createNodes() {
+	this.instance
+		.nodeColor((node: Node) => this.getNodeColor(node))
+		.nodeVisibility(this.doShowNode)
+		.onNodeHover(this.onNodeHover)
+		.nodeThreeObjectExtend(true)
+		.nodeThreeObject((node : any) => {
+			const sprite = new SpriteText(node.name);
+			node.sprite = sprite;
+			sprite.color = "white";
+			sprite.textHeight = 8;
+			sprite.backgroundColor = "black";
+			// get current viewpoint of camera
+			const currentCamera = this.instance.camera();
+			const currentCameraPosition = currentCamera.position;
+			// get the distance from the camera to the node
+			const distance = Math.sqrt(
+				Math.pow(node.x - currentCameraPosition.x, 2) +
+				Math.pow(node.y - currentCameraPosition.y, 2) +
+				Math.pow(node.z - currentCameraPosition.z, 2)
+			);
+			// always set position of sprite to be below the node relative to the camera
+
+
+
+			return sprite;
+		})
+		// execture whenever camera stops moving
+		.onEngineTick(() => {
+			console.log("onEngineStop", this.instance.cameraPosition());
+			
+		})
+};
 
     protected override createLinks() {
 		console.log("ForceGraph3DBase createLinks");
